@@ -10,3 +10,6 @@ test-results/
 playwright-report/
 blob-report/
 playwright/.cache/
+
+# Personal QA reference — spoils/documents the whole storyline, kept local only.
+STORYLINE.md
