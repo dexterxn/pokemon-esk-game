@@ -1,0 +1,146 @@
+:root {
+  --bg: #10151c;
+  --bg2: #1a2230;
+  --ink: #e8eef7;
+  --dim: #8fa0b8;
+  --accent: #35c48e;
+  --shell: #23303f;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  background: radial-gradient(circle at 50% 0%, #1d2836 0%, var(--bg) 70%);
+  color: var(--ink);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  overscroll-behavior: none;
+}
+
+#shell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  padding: 20px 14px 40px;
+}
+
+#screen-wrap {
+  position: relative;
+  line-height: 0;
+  border-radius: 10px;
+  padding: 12px;
+  background: linear-gradient(160deg, #2c3b4d, #18212c);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .07);
+}
+
+#screen {
+  display: block;
+  width: min(96vw, 960px);
+  height: auto;
+  aspect-ratio: 3 / 2;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+  background: #000;
+  border-radius: 3px;
+  outline: 2px solid #0b0f14;
+  touch-action: none;
+}
+
+/* ---- boot overlay ---- */
+#boot {
+  position: absolute;
+  inset: 12px;
+  display: grid;
+  place-items: center;
+  background: rgba(8, 12, 18, .92);
+  border-radius: 3px;
+  text-align: center;
+  line-height: 1.4;
+}
+#boot.hidden { display: none; }
+.boot-inner { padding: 16px; }
+.boot-ball {
+  width: 54px; height: 54px; margin: 0 auto 14px;
+  border-radius: 50%;
+  background: linear-gradient(#e8484c 0 50%, #f2f2f2 50% 100%);
+  border: 3px solid #14181d;
+  position: relative;
+  animation: wobble 2.4s ease-in-out infinite;
+}
+.boot-ball::after {
+  content: ""; position: absolute; inset: 0; margin: auto;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #fff; border: 3px solid #14181d;
+}
+@keyframes wobble {
+  0%, 70%, 100% { transform: rotate(0); }
+  76% { transform: rotate(-14deg); }
+  84% { transform: rotate(12deg); }
+  92% { transform: rotate(-6deg); }
+}
+@media (prefers-reduced-motion: reduce) { .boot-ball { animation: none; } }
+
+.boot-title { margin: 0; font-size: 20px; letter-spacing: 2px; font-weight: 700; }
+.boot-sub { margin: 2px 0 18px; color: var(--dim); font-size: 12px; letter-spacing: 3px; text-transform: uppercase; }
+.boot-hint { margin: 12px 0 0; color: var(--dim); font-size: 11px; }
+
+#start-btn {
+  font: inherit;
+  font-weight: 600;
+  padding: 10px 26px;
+  border-radius: 999px;
+  border: 0;
+  cursor: pointer;
+  color: #06231a;
+  background: var(--accent);
+  transition: transform .08s ease, filter .15s ease;
+}
+#start-btn:hover { filter: brightness(1.1); }
+#start-btn:active { transform: translateY(1px); }
+
+/* ---- touch pad (mobile only) ---- */
+#pad { display: none; width: min(96vw, 520px); justify-content: space-between; align-items: center; user-select: none; }
+.dpad { position: relative; width: 132px; height: 132px; }
+.pd, .ab, .sel {
+  position: absolute;
+  border: 0;
+  color: var(--ink);
+  background: var(--shell);
+  box-shadow: 0 3px 0 #131b24;
+  border-radius: 8px;
+  font-size: 15px;
+  touch-action: none;
+}
+.pd { width: 44px; height: 44px; }
+.pd.up { left: 44px; top: 0; }
+.pd.down { left: 44px; top: 88px; }
+.pd.left { left: 0; top: 44px; }
+.pd.right { left: 88px; top: 44px; }
+.pd:active, .ab:active, .sel:active { transform: translateY(3px); box-shadow: none; }
+
+.btns { position: relative; width: 150px; height: 132px; }
+.ab { width: 54px; height: 54px; border-radius: 50%; font-weight: 700; background: #3a4b60; }
+.ab.a { right: 0; top: 26px; background: #35c48e; color: #06231a; }
+.ab.b { right: 62px; top: 60px; background: #e8484c; color: #2a0709; }
+.sel { right: 6px; bottom: 0; width: 92px; height: 24px; font-size: 10px; letter-spacing: 1px; }
+
+@media (hover: none) and (pointer: coarse) {
+  #pad { display: flex; }
+}
+
+/* ---- legend ---- */
+#legend { width: min(96vw, 960px); }
+#legend h1 { margin: 0 0 12px; font-size: 17px; font-weight: 700; letter-spacing: .3px; }
+#legend h1 span { color: var(--dim); font-weight: 400; }
+#legend ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+#legend li {
+  display: flex; flex-direction: column; gap: 2px;
+  background: var(--bg2); border: 1px solid #2a3648;
+  padding: 8px 12px; border-radius: 8px; min-width: 150px;
+}
+#legend li b { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); }
+#legend li span { font-size: 13px; color: var(--ink); }
+.note { color: var(--dim); font-size: 12.5px; line-height: 1.6; max-width: 68ch; margin: 14px 0 0; }

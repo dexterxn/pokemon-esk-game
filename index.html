@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pokémon Emerald — Fan Clone</title>
+<meta name="description" content="A top-down, tile-based Pokémon Emerald style adventure that runs entirely in the browser.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle cx='8' cy='8' r='7' fill='%23e8484c'/><path d='M1 8h14a7 7 0 0 1-14 0z' fill='%23f4f4f4'/><circle cx='8' cy='8' r='2.6' fill='%23fff' stroke='%23222'/></svg>">
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<div id="shell">
+  <div id="screen-wrap">
+    <canvas id="screen" width="240" height="160"></canvas>
+    <div id="boot">
+      <div class="boot-inner">
+        <div class="boot-ball"></div>
+        <p class="boot-title">POKéMON EMERALD</p>
+        <p class="boot-sub">fan clone</p>
+        <button id="start-btn" type="button">Press to Start</button>
+        <p class="boot-hint">Sound starts muted until you press Start.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="pad" aria-hidden="false">
+    <div class="dpad">
+      <button class="pd up"    data-key="up">▲</button>
+      <button class="pd left"  data-key="left">◀</button>
+      <button class="pd right" data-key="right">▶</button>
+      <button class="pd down"  data-key="down">▼</button>
+    </div>
+    <div class="btns">
+      <button class="ab b" data-key="b">B</button>
+      <button class="ab a" data-key="a">A</button>
+      <button class="sel" data-key="start">START</button>
+    </div>
+  </div>
+
+  <div id="legend">
+    <h1>Pokémon Emerald <span>— fan clone</span></h1>
+    <ul>
+      <li><b>Move</b><span>Arrow keys or W A S D</span></li>
+      <li><b>A / Confirm</b><span>Z · Space · Enter</span></li>
+      <li><b>B / Cancel · Run</b><span>X · Backspace · Shift</span></li>
+      <li><b>Menu</b><span>Esc · Tab</span></li>
+      <li><b>Mute</b><span>M</span></li>
+      <li><b>Fullscreen</b><span>F</span></li>
+    </ul>
+    <p class="note">Talk to Professor Birch in the lab to get your starter. Walk in tall grass to find wild Pokémon. Progress saves to this browser.</p>
+  </div>
+</div>
+<script type="module" src="./js/main.js"></script>
+</body>
+</html>
