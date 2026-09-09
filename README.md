@@ -89,6 +89,14 @@ python -m http.server 8000
 
 Then visit `http://localhost:8000`.
 
+## Testing
+
+The game itself has no dependencies, but there's a [Playwright](https://playwright.dev/)
+test suite under [`tests/`](./tests) for automated regression testing (`npm install && npx playwright install && npm test`).
+See [`tests/README.md`](./tests/README.md) for how it's wired up and how to write
+your own tests, and [`TESTING_CHECKLIST.md`](./TESTING_CHECKLIST.md) for a
+comprehensive, system-by-system list of everything worth verifying.
+
 ## Deployment
 
 `.github/workflows/deploy.yml` publishes the repository root to GitHub Pages on
