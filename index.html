@@ -18,7 +18,8 @@
         <p class="boot-title">POKéMON EMERALD</p>
         <p class="boot-sub">fan clone</p>
         <button id="start-btn" type="button">Press to Start</button>
-        <p class="boot-hint">Sound starts muted until you press Start.</p>
+        <button class="file-btn load-save-btn" type="button">Load save file…</button>
+        <p class="boot-hint" id="boot-hint">Sound starts muted until you press Start.</p>
       </div>
     </div>
   </div>
@@ -48,6 +49,13 @@
       <li><b>Fullscreen</b><span>F</span></li>
     </ul>
     <p class="note">Talk to Professor Birch in the lab to get your starter. Walk in tall grass to find wild Pokémon. Progress saves to this browser.</p>
+    <div class="save-files">
+      <button class="file-btn" id="download-save-btn" type="button">Download save file</button>
+      <button class="file-btn load-save-btn" type="button">Load save file…</button>
+      <span class="save-status" id="save-status" role="status"></span>
+    </div>
+    <p class="note">To keep playing on another device, download your save file (or choose <b>EXPORT</b> in the in-game menu), then load it there.</p>
+    <input type="file" id="save-file-input" accept=".txt,text/plain" hidden>
   </div>
 </div>
 <script type="module" src="./js/main.js"></script>

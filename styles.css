@@ -101,6 +101,19 @@ html, body {
 #start-btn:hover { filter: brightness(1.1); }
 #start-btn:active { transform: translateY(1px); }
 
+.file-btn {
+  font: inherit;
+  font-size: 13px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid #2a3648;
+  cursor: pointer;
+  color: var(--ink);
+  background: var(--bg2);
+}
+.file-btn:hover { border-color: var(--accent); }
+#boot .file-btn { display: block; margin: 10px auto 0; font-size: 12px; }
+
 /* ---- touch pad (mobile only) ---- */
 #pad { display: none; width: min(96vw, 520px); justify-content: space-between; align-items: center; user-select: none; }
 .dpad { position: relative; width: 132px; height: 132px; }
@@ -143,4 +156,6 @@ html, body {
 }
 #legend li b { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--accent); }
 #legend li span { font-size: 13px; color: var(--ink); }
+.save-files { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+.save-status { color: var(--dim); font-size: 12.5px; }
 .note { color: var(--dim); font-size: 12.5px; line-height: 1.6; max-width: 68ch; margin: 14px 0 0; }

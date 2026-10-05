@@ -39,6 +39,11 @@ Touch controls appear automatically on phones and tablets.
 - **Saving** — `SAVE` from the start menu writes to `localStorage`, and the game
   autosaves when you leave the tab. Blacking out returns you to the last
   Pokémon Center you visited.
+- **Portable save files** — `EXPORT` in the start menu (or the *Download save
+  file* button under the game) downloads your progress as a `.txt` file. Use
+  *Load save file…* on any other machine to pick up where you left off.
+- **Party order** — in the `POKéMON` menu, press A on a Pokémon and choose
+  `SWITCH` to move it to another slot. The first healthy Pokémon leads in battle.
 
 ## How it works
 

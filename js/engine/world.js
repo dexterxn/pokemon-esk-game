@@ -15,7 +15,7 @@ import {
   state, hasFlag, giveStarter, healParty, addItem, removeItem, spendMoney,
   formatPlayTime, dexSeenCount, dexCaughtCount,
 } from './state.js';
-import { saveGame } from './save.js';
+import { saveGame, downloadSaveFile } from './save.js';
 import { PartyScreen, BagScreen, DexScreen, ShopScreen, drawTrainerCard } from './menus.js';
 
 const DIR_VECTORS = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
@@ -494,6 +494,16 @@ export class World {
         this.msg.push(saveGame() ? 'Your progress has been saved.' : 'Saving failed — storage is unavailable.');
         audio.sfx('save');
         break;
+      case 'EXPORT':
+        this.mode = 'walk';
+        saveGame();
+        downloadSaveFile();
+        audio.sfx('save');
+        this.msg.push([
+          'Your save file has been downloaded.',
+          'Load it on any device to continue your adventure!',
+        ]);
+        break;
       default:
         this.mode = 'walk';
     }
@@ -503,7 +513,7 @@ export class World {
     const items = [];
     if (dexSeenCount() > 0) items.push('POKéDEX');
     if (state.party.length > 0) items.push('POKéMON');
-    items.push('BAG', 'CARD', 'SAVE', 'EXIT');
+    items.push('BAG', 'CARD', 'SAVE', 'EXPORT', 'EXIT');
     return items;
   }
 

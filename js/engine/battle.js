@@ -174,7 +174,17 @@ export class Battle {
 
     if (!wasPressed('a')) return;
     audio.sfx('select');
-    if (this.menuIndex === 0) { this.mode = 'moves'; this.moveIndex = 0; }
+    if (this.menuIndex === 0) {
+      // With every move out of PP the only option left is Struggle.
+      if (this.player.mon.moves.every((m) => m.pp <= 0)) {
+        this.mode = 'events';
+        this.say(`${displayName(this.player.mon).toUpperCase()} has no moves left!`);
+        this.takeTurn({ kind: 'move', slot: { id: null, pp: 1, maxPp: 1 } });
+        return;
+      }
+      this.mode = 'moves';
+      this.moveIndex = 0;
+    }
     else if (this.menuIndex === 1) { this.screen = new BagScreen({ context: 'battle' }); }
     else if (this.menuIndex === 2) {
       this.screen = new PartyScreen({ mode: 'select', title: 'Send out which POKéMON?' });
@@ -187,8 +197,12 @@ export class Battle {
   updateMoveMenu() {
     const moves = this.player.mon.moves;
     const before = this.moveIndex;
-    if (wasPressed('up')) this.moveIndex = (this.moveIndex - 1 + moves.length) % moves.length;
-    if (wasPressed('down')) this.moveIndex = (this.moveIndex + 1) % moves.length;
+    // Moves sit in a 2x2 grid (0 1 / 2 3): left/right change column, up/down
+    // change row. Slots that don't exist (fewer than four moves) are skipped.
+    let target = this.moveIndex;
+    if (wasPressed('left') || wasPressed('right')) target = this.moveIndex ^ 1;
+    if (wasPressed('up') || wasPressed('down')) target = this.moveIndex ^ 2;
+    if (target < moves.length) this.moveIndex = target;
     if (before !== this.moveIndex) audio.sfx('select');
 
     if (wasPressed('b')) { audio.sfx('cancel'); this.mode = 'menu'; return; }
@@ -256,8 +270,8 @@ export class Battle {
 
     const order = [];
     if (playerAction.kind === 'move') {
-      const pMove = getMove(playerAction.slot.id) || STRUGGLE;
-      const fMove = getMove(foeAction.slot.id) || STRUGGLE;
+      const pMove = (playerAction.slot.id && getMove(playerAction.slot.id)) || STRUGGLE;
+      const fMove = (foeAction.slot.id && getMove(foeAction.slot.id)) || STRUGGLE;
       const pPriority = pMove.priority || 0;
       const fPriority = fMove.priority || 0;
       const pSpeed = effectiveStat(this.player, 'speed');
@@ -529,7 +543,11 @@ export class Battle {
       for (const moveId of result.learned) {
         this.say(`${displayName(mon).toUpperCase()} learned ${getMove(moveId).name}!`);
       }
-      if (result.evolveTo) this.pendingEvolutions.push({ mon, into: result.evolveTo });
+      // A Pokémon can pass its evolution level again against a later foe; it
+      // should still only evolve once.
+      if (result.evolveTo && !this.pendingEvolutions.some((e) => e.mon === mon)) {
+        this.pendingEvolutions.push({ mon, into: result.evolveTo });
+      }
     }
 
     if (this.isTrainer) {
@@ -537,6 +555,8 @@ export class Battle {
       if (this.foeIndex < this.foeParty.length) {
         this.run(() => {
           this.foe = makeCombatant(this.foeParty[this.foeIndex]);
+          // Only Pokémon that face the new foe share its EXP.
+          this.participants = new Set([this.playerIndex]);
           registerSeen(this.foe.mon.species);
           this.intro = 0.4;
         });
