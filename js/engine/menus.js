@@ -1,5 +1,7 @@
 import { drawText, textWidth, LINE_HEIGHT } from '../render/font.js';
-import { panel, drawHpBar, drawExpBar, drawTypeChip, UI, SCREEN_W, SCREEN_H } from '../render/ui.js';
+import {
+  panel, drawHpBar, drawExpBar, drawTypeChip, drawMenuList, UI, SCREEN_W, SCREEN_H,
+} from '../render/ui.js';
 import { drawPokemon, drawPokemonSilhouette } from '../render/sprites.js';
 import { SPECIES_LIST, getSpecies } from '../data/species.js';
 import { TYPE_COLORS } from '../data/types.js';
@@ -26,8 +28,11 @@ function cursorMove(index, count, vertical = true) {
 const hpRatio = (mon) => clamp(mon.hp / mon.stats.hp, 0, 1);
 
 /** One row of the party list. */
-function drawPartyRow(ctx, mon, x, y, w, h, selected) {
-  panel(ctx, x, y, w, h, selected ? { border: '#c07028', borderLight: '#f0c060', fill: '#fff6e0' } : {});
+const ROW_SELECTED = { border: '#c07028', borderLight: '#f0c060', fill: '#fff6e0' };
+const ROW_MOVING = { border: '#2f7a52', borderLight: '#6fd0a0', fill: '#e6f8ee' };
+
+function drawPartyRow(ctx, mon, x, y, w, h, style) {
+  panel(ctx, x, y, w, h, style || {});
   drawPokemon(ctx, mon.species, x + 3, y + Math.round((h - 22) / 2), 22, false, mon.hp > 0 ? 1 : 0.45);
 
   const name = displayName(mon).toUpperCase();
@@ -45,7 +50,12 @@ function drawPartyRow(ctx, mon, x, y, w, h, selected) {
   drawText(ctx, hpText, x + w - 8 - textWidth(hpText), y + 4 + LINE_HEIGHT, UI.ink, UI.shadow);
 }
 
-/** Party list. `mode` 'select' returns the chosen slot; 'view' opens summaries. */
+const PARTY_ACTIONS = ['SUMMARY', 'SWITCH', 'CANCEL'];
+
+/**
+ * Party list. `mode` 'select' returns the chosen slot; 'view' offers a summary
+ * or SWITCH, which lets the player reorder the party.
+ */
 export class PartyScreen {
   constructor(opts = {}) {
     this.index = 0;
@@ -54,6 +64,8 @@ export class PartyScreen {
     this.filter = opts.filter || null;
     this.noCancel = !!opts.noCancel;
     this.summary = null;
+    this.actions = null;      // { index } while the SUMMARY/SWITCH menu is open
+    this.swapFrom = null;     // slot being moved during a SWITCH
   }
 
   update() {
@@ -61,15 +73,19 @@ export class PartyScreen {
       if (wasPressed('a') || wasPressed('b')) { audio.sfx('cancel'); this.summary = null; }
       return null;
     }
+    if (this.actions) { this.updateActions(); return null; }
+
     const count = state.party.length;
     this.index = cursorMove(this.index, count);
+
+    if (this.swapFrom !== null) { this.updateSwap(); return null; }
 
     if (wasPressed('a') && count > 0) {
       const mon = state.party[this.index];
       if (this.filter && !this.filter(mon)) { audio.sfx('cancel'); return null; }
       audio.sfx('select');
       if (this.mode === 'select') return { action: 'select', index: this.index, mon };
-      this.summary = mon;
+      this.actions = { index: 0 };
       return null;
     }
     if ((wasPressed('b') || wasPressed('start')) && !this.noCancel) {
@@ -79,6 +95,30 @@ export class PartyScreen {
     return null;
   }
 
+  updateActions() {
+    this.actions.index = cursorMove(this.actions.index, PARTY_ACTIONS.length);
+    if (wasPressed('b')) { audio.sfx('cancel'); this.actions = null; return; }
+    if (!wasPressed('a')) return;
+
+    const choice = PARTY_ACTIONS[this.actions.index];
+    this.actions = null;
+    if (choice === 'SUMMARY') { audio.sfx('select'); this.summary = state.party[this.index]; }
+    else if (choice === 'SWITCH' && state.party.length > 1) { audio.sfx('select'); this.swapFrom = this.index; }
+    else audio.sfx('cancel');
+  }
+
+  /** Second half of SWITCH: pick the slot to trade places with. */
+  updateSwap() {
+    if (wasPressed('b') || wasPressed('start')) { audio.sfx('cancel'); this.swapFrom = null; return; }
+    if (!wasPressed('a')) return;
+    const from = this.swapFrom;
+    const to = this.index;
+    this.swapFrom = null;
+    if (from === to) { audio.sfx('cancel'); return; }
+    [state.party[from], state.party[to]] = [state.party[to], state.party[from]];
+    audio.sfx('save');
+  }
+
   draw(ctx) {
     ctx.fillStyle = '#3a5a8a';
     ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
@@ -86,7 +126,8 @@ export class PartyScreen {
 
     const rowH = 23;
     state.party.forEach((mon, i) => {
-      drawPartyRow(ctx, mon, 4, 2 + i * rowH, SCREEN_W - 8, rowH - 1, i === this.index);
+      const style = i === this.swapFrom ? ROW_MOVING : i === this.index ? ROW_SELECTED : null;
+      drawPartyRow(ctx, mon, 4, 2 + i * rowH, SCREEN_W - 8, rowH - 1, style);
     });
     if (state.party.length === 0) {
       panel(ctx, 20, 60, 200, 40);
@@ -94,7 +135,14 @@ export class PartyScreen {
     }
 
     panel(ctx, 4, SCREEN_H - 18, SCREEN_W - 8, 16);
-    drawText(ctx, this.title, 12, SCREEN_H - 13, UI.ink, UI.shadow);
+    const title = this.swapFrom !== null ? 'Move to where?' : this.title;
+    drawText(ctx, title, 12, SCREEN_H - 13, UI.ink, UI.shadow);
+
+    if (this.actions) {
+      const w = 70;
+      const h = PARTY_ACTIONS.length * LINE_HEIGHT + 10;
+      drawMenuList(ctx, PARTY_ACTIONS, this.actions.index, SCREEN_W - w - 4, SCREEN_H - 20 - h, w);
+    }
   }
 }
 

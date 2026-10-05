@@ -204,8 +204,9 @@ export function catchAttempt(mon, ballRate) {
 /** Chance the player escapes a wild battle, Gen-3 formula with an attempt counter. */
 export function escapeChance(playerSpeed, foeSpeed, attempts) {
   if (playerSpeed > foeSpeed) return 1;
-  const odds = (Math.floor((playerSpeed * 128) / Math.max(1, foeSpeed)) + 30 * attempts) % 256;
-  return clamp(odds / 256, 0, 1);
+  // Gen 3 escapes outright once the odds pass 255; they must not wrap around.
+  const odds = Math.floor((playerSpeed * 128) / Math.max(1, foeSpeed)) + 30 * attempts;
+  return odds > 255 ? 1 : odds / 256;
 }
 
 /** Residual damage at end of turn from burn/poison. Returns HP lost. */

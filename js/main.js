@@ -4,8 +4,10 @@ import { SCREEN_H, MessageBox } from './render/ui.js';
 import { drawText } from './render/font.js';
 import { World } from './engine/world.js';
 import { Battle } from './engine/battle.js';
-import { state, setFlag, healParty, hasFlag } from './engine/state.js';
-import { loadGame, hasSave, saveGame } from './engine/save.js';
+import { state, setFlag, healParty, hasFlag, formatPlayTime } from './engine/state.js';
+import {
+  loadGame, hasSave, saveGame, downloadSaveFile, importSaveText,
+} from './engine/save.js';
 import { displayName, evolveInto } from './engine/pokemon.js';
 import { getSpecies } from './data/species.js';
 
@@ -54,6 +56,54 @@ function toggleFullscreen() {
   if (document.fullscreenElement) document.exitFullscreen?.();
   else target.requestFullscreen?.();
 }
+
+// ----------------------------------------------------------- save file transfer
+
+const saveStatus = document.getElementById('save-status');
+const bootHint = document.getElementById('boot-hint');
+const fileInput = document.getElementById('save-file-input');
+
+function setSaveStatus(text) {
+  saveStatus.textContent = text;
+}
+
+document.getElementById('download-save-btn').addEventListener('click', () => {
+  // Before Start is pressed the live state is still blank, so export the
+  // browser's save instead of a fresh game.
+  if (!game.running && hasSave()) loadGame();
+  downloadSaveFile();
+  setSaveStatus('Save file downloaded.');
+  if (game.running) flashToast('Save exported');
+});
+
+document.querySelectorAll('.load-save-btn').forEach((btn) => {
+  btn.addEventListener('click', () => fileInput.click());
+});
+
+fileInput.addEventListener('change', async () => {
+  const file = fileInput.files[0];
+  fileInput.value = '';
+  if (!file) return;
+  try {
+    importSaveText(await file.text());
+  } catch (err) {
+    setSaveStatus(err.message);
+    if (!game.running) bootHint.textContent = err.message;
+    return;
+  }
+  const summary = `${state.player.name} · ${state.party.length} POKéMON · ${formatPlayTime()}`;
+  setSaveStatus(`Loaded save: ${summary}`);
+  if (!game.running) {
+    bootHint.textContent = `Save loaded (${summary}). Press Start to continue.`;
+    return;
+  }
+  // Swap the running game over to the imported save.
+  game.battle = null;
+  game.post = null;
+  game.world = new World();
+  game.scene = 'world';
+  flashToast('Save loaded');
+});
 
 let toast = null;
 function flashToast(text) {
